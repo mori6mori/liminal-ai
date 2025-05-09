@@ -17,6 +17,7 @@ from chunker import ScriptGenerator
 from tts import TextToSpeech
 # from broll import BRollGenerator
 # from assembler import VideoAssembler
+from caption_overlay import CaptionOverlay
 
 def process(input_text: str):
     script_generator = ScriptGenerator()
@@ -47,6 +48,20 @@ def process(input_text: str):
             print(f"Processing script: {chunk.get('title', 'Untitled')}")
             voiceover = tts.generate_voiceover(chunk)
             print(voiceover)
+
+        # After generating the video
+        if "full_audio" in voiceover and os.path.exists(voiceover["full_audio"]):
+            # Generate captions
+            srt_file = tts.generate_caption(voiceover["full_audio"])
+            
+            # Add captions to video
+            caption_overlay = CaptionOverlay()
+            captioned_video = caption_overlay.add_captions_to_video(
+                video_path=video_file,  # Path to the generated video
+                srt_path=srt_file
+            )
+            
+            print(f"Video with captions saved to: {captioned_video}")
 
 if __name__ == "__main__":
     article_text = """
